@@ -38,6 +38,19 @@ func main() {
 		return
 	}
 
+	aof.read(func(value Value) {
+		command := strings.ToUpper(value.array[0].bulk)
+		args := value.array[1:]
+
+		handler, ok := handlers[command]
+		if !ok {
+			fmt.Println("Invalid command: ", command)
+			return
+		}
+
+		handler(args)
+	})
+
 	connection, err := listener.Accept()
 
 	if err != nil {

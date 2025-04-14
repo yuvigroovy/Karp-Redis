@@ -59,3 +59,20 @@ func (aof *Aof) write(value Value) error {
 
 	return nil
 }
+
+func (aof *Aof) read(callback func(value Value)) error {
+	aof.mutex.Lock()
+	defer aof.mutex.Unlock()
+
+	resp := newResp(aof.file)
+
+	for {
+		value, err := read(resp)
+
+		if err != nil { //loop until we get an error (EOF counts as an error)
+			return err
+		}
+
+		callback(value)
+	}
+}
