@@ -6,25 +6,39 @@ import (
 	"strings"
 )
 
-func startServer(port string) net.Listener {
+func startServer(port string) (net.Listener, error) {
 	listener, err := net.Listen("tcp", ":"+port)
 
 	if err != nil {
-		fmt.Println(err.Error())
-
-		return nil
+		return nil, err
 	}
 
-	return listener
+	return listener, nil
+}
+
+func startAof(path string) {
+
 }
 
 func main() {
 	port := "6379"
-	listener := startServer(port)
+	listener, err := startServer(port)
+
+	if err != nil {
+		fmt.Println(err.Error())
+
+		return
+	}
+
 	fmt.Println("started server on port: " + port)
 
+	aof, err := NewAof("db.aof")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
 	connection, err := listener.Accept()
-	fmt.Println("accepting connection")
 
 	if err != nil {
 		fmt.Println(err.Error())
@@ -63,6 +77,10 @@ func main() {
 			fmt.Println("Invalid command: ", command)
 			writer.write(Value{typ: "string", str: ""})
 			continue
+		}
+
+		if command == "SET" || command == "HSET" {
+			aof.write(value)
 		}
 
 		result := handler(args)
