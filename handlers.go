@@ -30,6 +30,8 @@ func set(args []Value) Value {
 	key := args[0].bulk
 	value := args[1].bulk
 
+	fmt.Println("set: params: ", key, value)
+
 	SETsMu.Lock()
 	SETs[key] = value
 	SETsMu.Unlock()
@@ -43,6 +45,8 @@ func get(args []Value) Value {
 	}
 
 	key := args[0].bulk
+
+	fmt.Println("get: params: ", key)
 
 	SETsMu.RLock()
 	value, ok := SETs[key]
